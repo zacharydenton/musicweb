@@ -36,7 +36,7 @@ class Album:
 
         self.songs = []
         for song_filename in glob.glob(os.path.join(self.original_path, "*.flac")):
-            self.songs.append(mediafile.MediaFile(song_filename))
+            self.songs.append(Song(song_filename, "FLAC"))
         self.songs.sort(key = lambda s: s.track)
 
         self.title = self.songs[0].album
@@ -62,6 +62,7 @@ class Album:
         return self.title
 
     def create_formats(self):
+        self.files = []
         self.formats = []
         self.zips = []
         for encoding in encodings:
@@ -82,6 +83,11 @@ class Album:
                     name, extension = os.path.splitext(filename)
                     shutil.move(os.path.join(transcode_dir, filename), os.path.join(transcode_dir, slugify(name) + extension))
 
+            for filename in glob.glob(os.path.join(transcode_dir, "*")):
+                try:
+                    self.files.append(Song(filename, encoding=encoding))
+                except:
+                    pass
             self.formats.append(slugify(encoding))
             self.zips.append((os.path.basename(zip_file), encoding))
 
@@ -91,6 +97,11 @@ class Album:
             album=self,
         ).encode('utf-8')
         open(output, 'w').write(content)
+
+class Song(mediafile.MediaFile):
+    def __init__(self, path, encoding):
+        super(Song, self).__init__(path)
+        self.encoding = encoding
         
 def is_album(path):
     extensions = set(os.path.splitext(filename)[-1] for filename in os.listdir(path))
