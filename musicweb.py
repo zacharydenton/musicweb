@@ -37,11 +37,12 @@ class Album:
         self.songs = []
         for song_filename in glob.glob(os.path.join(self.original_path, "*.flac")):
             self.songs.append(mediafile.MediaFile(song_filename))
+        self.songs.sort(key = lambda s: s.track)
 
         self.title = self.songs[0].album
         self.artists = sorted(set(song.artist for song in self.songs))
         self.genres = sorted(set(song.genre for song in self.songs))
-        self.year = self.songs[0].year
+        self.date = self.songs[0].date
 
         self.images = []
         for image in glob.glob(os.path.join(self.path, "*.jpg")):

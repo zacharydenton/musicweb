@@ -9,28 +9,41 @@ excerpt: |
 <h3>Entire album, zipped</h3>
 <ul>
     {% for zip, format in album.zips %}
-    <li><a href="{{ zip }}">{{ format|upper }}</a></li>
-    {% endfor %}
+    <li><a href="{{ zip }}">{{ format|upper }}</a></li>{% endfor %}
 </ul>
 
 <h3>Individual tracks</h3>
 <ul>
     {% for format in album.formats %}
-    <li><a href="{{ format }}">{{ format|upper }}</a></li>
-    {% endfor %}
+    <li><a href="{{ format }}">{{ format|upper }}</a></li>{% endfor %}
 </ul>
 
-<h2>Tracks</h2>
-<ul>
-    {% for song in album.songs %}
-    <li>{{ song.artist }} - {{ song.title }}</li>
-    {% endfor %}
+<hr />
+
+<h2>Album info</h2>
+<h3>Tracks</h3>
+<ul>{% for song in album.songs %}
+    <li>
+        <dl>
+            <dt>Track</dt>
+            <dd>{{ song.track }}</dd>
+            <dt>Title</dt>
+            <dd>{{ song.title }}</dd>
+            <dt>Artist</dt>
+            <dd>{{ song.artist }}</dd>
+            <dt>Length</dt>
+            <dd>{{ "%i:%02i"|format((song.length / 60)|int, (song.length % 60)|int) }}</dd>
+            {% if song.genre %}
+            <dt>Genre</dt>
+            <dd>{{ song.genre }}</dd>
+            {% endif %}
+        </dl>
+    </li>{% endfor  %}
 </ul>
 
-<h2>Artists</h2>
+<h3>Artists</h3>
 <ul>
     {% for artist in album.artists %}
-    <li>{{ artist }}</li>
-    {% endfor %}
+    <li>{{ artist }}</li>{% endfor %}
 </ul>
 
