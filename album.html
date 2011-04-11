@@ -5,6 +5,10 @@ excerpt: |
     Download {{ album.title }} for free in FLAC, OGG, MP3, and AAC.
 ---
 
+{% for image in album.images %}
+<img src="{{ image }}" alt="{{ album.title }}" />
+{% endfor %}
+
 <h2>Download</h2>
 <h3>Entire album, zipped</h3>
 <ul>

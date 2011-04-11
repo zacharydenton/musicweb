@@ -3,6 +3,7 @@ import re
 import os
 import glob
 import shutil
+import fnmatch
 import subprocess
 from jinja2 import Template
 import mediafile
@@ -39,22 +40,23 @@ class Album:
             self.songs.append(Song(song_filename, "FLAC"))
         self.songs.sort(key = lambda s: s.track)
 
+        # copy non-music files
+        for filename in os.listdir(self.original_path):
+            if not fnmatch.fnmatch(filename, '*.flac'):
+                old_file = os.path.join(self.original_path, filename)
+                name, ext = os.path.splitext(os.path.basename(old_file))
+                new_file = os.path.join(self.path, slugify(name) + ext)
+                shutil.copy(old_file, new_file)
+
         self.title = self.songs[0].album
         self.artists = sorted(set(song.artist for song in self.songs))
         self.genres = sorted(set(song.genre for song in self.songs))
         self.date = self.songs[0].date
 
-        self.images = []
-        for image in glob.glob(os.path.join(self.path, "*.jpg")):
-            self.images.append(image)
-
-        self.logs = []
-        for log in glob.glob(os.path.join(self.path, "*.log")):
-            self.logs.append(log)
-
-        self.cuesheets = []
-        for cuesheet in glob.glob(os.path.join(self.path, "*.cue")):
-            self.cuesheets.append(cuesheet)
+        self.images = map(os.path.basename, glob.glob(os.path.join(self.path, "*.jpg")))
+        self.logs = map(os.path.basename, glob.glob(os.path.join(self.path, "*.log")))
+        self.cuesheets = map(os.path.basename, glob.glob(os.path.join(self.path, "*.cue")))
+        self.playlists = map(os.path.basename, glob.glob(os.path.join(self.path, "*.m3u")))
 
         self.create_formats()
 
