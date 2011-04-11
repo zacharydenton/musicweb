@@ -29,10 +29,11 @@ def slugify(value):
 
 class Album:
     def __init__(self, path, albums_dir):
-        self.dirname = slugify(os.path.split(path)[-1])
+        self.original_path = path
+        self.dirname = slugify(os.path.split(self.original_path)[-1])
         self.path = os.path.join(albums_dir, self.dirname)
         if not os.path.isdir(self.path):
-            shutil.copytree(path, self.path)
+            shutil.copytree(self.original_path, self.path)
 
             # slugify filenames
             for filename in os.listdir(self.path):
@@ -57,8 +58,13 @@ class Album:
 
         self.formats = self.transcode()
 
+        self.title = self.songs[0].metadata.album
+        self.artists = sorted(set(song.metadata.artist for song in self.songs))
+        self.genres = sorted(set(song.metadata.genre for song in self.songs))
+        self.year = self.songs[0].metadata.year
+
     def __str__(self):
-        return self.songs[0].metadata.album
+        return self.title
 
     def transcode(self):
         formats = []
@@ -66,7 +72,13 @@ class Album:
             transcode_dir = os.path.join(self.path, slugify(encoding))
             if not os.path.isdir(transcode_dir):
                 os.makedirs(transcode_dir)
-            formats.append(transcode.transcode(self.path, encoding, output_dir=transcode_dir))
+                transcode.transcode(self.original_path, encoding, output_dir=transcode_dir)
+                # slugify filenames
+                for filename in os.listdir(transcode_dir):
+                    name, extension = os.path.splitext(filename)
+                    shutil.move(os.path.join(transcode_dir, filename), os.path.join(transcode_dir, slugify(name) + extension))
+            formats.append(transcode_dir)
+
         return formats
         
 class Song:
@@ -85,7 +97,11 @@ def generate_albums(albums, output_dir):
     pass
 
 def generate_index(albums, output):
-    pass
+    albums = sorted(albums, key = lambda a: a.title)
+    content = index_template.render(
+        albums=albums,
+    ).encode('utf-8')
+    open(output, 'w').write(content)
 
 def main():
     music_dir = os.path.expanduser("~/Music")
