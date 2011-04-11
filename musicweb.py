@@ -3,11 +3,12 @@ import re
 import os
 import glob
 import shutil
+import subprocess
 from jinja2 import Template
 import mediafile
 import transcode
 
-encodings = ['320', 'V0', 'V2', 'Q8', 'AAC']
+encodings = ['FLAC', '320', 'V0', 'V2', 'Q8', 'AAC']
 album_template = Template(open('album.html').read())
 index_template = Template(open('index.html').read())
 
@@ -32,17 +33,15 @@ class Album:
         self.original_path = path
         self.dirname = slugify(os.path.split(self.original_path)[-1])
         self.path = os.path.join(albums_dir, self.dirname)
-        if not os.path.isdir(self.path):
-            shutil.copytree(self.original_path, self.path)
-
-            # slugify filenames
-            for filename in os.listdir(self.path):
-                name, extension = os.path.splitext(filename)
-                shutil.move(os.path.join(self.path, filename), os.path.join(self.path, slugify(name) + extension))
 
         self.songs = []
-        for song_filename in glob.glob(os.path.join(self.path, "*.flac")):
+        for song_filename in glob.glob(os.path.join(self.original_path, "*.flac")):
             self.songs.append(mediafile.MediaFile(song_filename))
+
+        self.title = self.songs[0].album
+        self.artists = sorted(set(song.artist for song in self.songs))
+        self.genres = sorted(set(song.genre for song in self.songs))
+        self.year = self.songs[0].year
 
         self.images = []
         for image in glob.glob(os.path.join(self.path, "*.jpg")):
@@ -56,30 +55,34 @@ class Album:
         for cuesheet in glob.glob(os.path.join(self.path, "*.cue")):
             self.cuesheets.append(cuesheet)
 
-        self.formats = self.transcode()
-
-        self.title = self.songs[0].album
-        self.artists = sorted(set(song.artist for song in self.songs))
-        self.genres = sorted(set(song.genre for song in self.songs))
-        self.year = self.songs[0].year
+        self.create_formats()
 
     def __str__(self):
         return self.title
 
-    def transcode(self):
-        formats = []
+    def create_formats(self):
+        self.formats = []
+        self.zips = []
         for encoding in encodings:
             transcode_dir = os.path.join(self.path, slugify(encoding))
+            zip_file = os.path.join(self.path, slugify("{title} - {encoding}".format(title=self.title, encoding=encoding)) + ".zip")
             if not os.path.isdir(transcode_dir):
-                os.makedirs(transcode_dir)
-                transcode.transcode(self.original_path, encoding, output_dir=transcode_dir)
+                if encoding == "FLAC":
+                    shutil.copytree(self.original_path, transcode_dir)
+                else:
+                    os.makedirs(transcode_dir)
+                    transcode.transcode(self.original_path, encoding, output_dir=transcode_dir)
+
+                # build the zip
+                subprocess.call('zip -r "{0}" "{1}"'.format(zip_file, transcode_dir), shell=True)
+
                 # slugify filenames
                 for filename in os.listdir(transcode_dir):
                     name, extension = os.path.splitext(filename)
                     shutil.move(os.path.join(transcode_dir, filename), os.path.join(transcode_dir, slugify(name) + extension))
-            formats.append(slugify(encoding))
 
-        return formats
+            self.formats.append(slugify(encoding))
+            self.zips.append((os.path.basename(zip_file), encoding))
 
     def generate_index(self):
         output = os.path.join(self.path, "index.html")

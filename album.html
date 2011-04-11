@@ -6,6 +6,14 @@ excerpt: |
 ---
 
 <h2>Download</h2>
+<h3>Entire album, zipped</h3>
+<ul>
+    {% for zip, format in album.zips %}
+    <li><a href="{{ zip }}">{{ format|upper }}</a></li>
+    {% endfor %}
+</ul>
+
+<h3>Individual tracks</h3>
 <ul>
     {% for format in album.formats %}
     <li><a href="{{ format }}">{{ format|upper }}</a></li>
