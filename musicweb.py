@@ -42,7 +42,7 @@ class Album:
 
         self.songs = []
         for song_filename in glob.glob(os.path.join(self.path, "*.flac")):
-            self.songs.append(Song(song_filename))
+            self.songs.append(mediafile.MediaFile(song_filename))
 
         self.images = []
         for image in glob.glob(os.path.join(self.path, "*.jpg")):
@@ -58,10 +58,10 @@ class Album:
 
         self.formats = self.transcode()
 
-        self.title = self.songs[0].metadata.album
-        self.artists = sorted(set(song.metadata.artist for song in self.songs))
-        self.genres = sorted(set(song.metadata.genre for song in self.songs))
-        self.year = self.songs[0].metadata.year
+        self.title = self.songs[0].album
+        self.artists = sorted(set(song.artist for song in self.songs))
+        self.genres = sorted(set(song.genre for song in self.songs))
+        self.year = self.songs[0].year
 
     def __str__(self):
         return self.title
@@ -77,24 +77,24 @@ class Album:
                 for filename in os.listdir(transcode_dir):
                     name, extension = os.path.splitext(filename)
                     shutil.move(os.path.join(transcode_dir, filename), os.path.join(transcode_dir, slugify(name) + extension))
-            formats.append(transcode_dir)
+            formats.append(slugify(encoding))
 
         return formats
+
+    def generate_index(self):
+        output = os.path.join(self.path, "index.html")
+        content = album_template.render(
+            album=self,
+        ).encode('utf-8')
+        open(output, 'w').write(content)
         
-class Song:
-    def __init__(self, path):
-        self.path = path
-        self.metadata = mediafile.MediaFile(path)
-
-    def __str__(self):
-        return self.metadata.title
-
 def is_album(path):
     extensions = set(os.path.splitext(filename)[-1] for filename in os.listdir(path))
     return ".flac" in extensions
 
-def generate_albums(albums, output_dir):
-    pass
+def generate_albums(albums):
+    for album in albums:
+        album.generate_index()
 
 def generate_index(albums, output):
     albums = sorted(albums, key = lambda a: a.title)
@@ -114,7 +114,7 @@ def main():
         if is_album(path):
             albums.append(Album(path, output_dir))
     
-    generate_albums(albums, output_dir)
+    generate_albums(albums)
     generate_index(albums, index)
 
 if __name__ == "__main__":

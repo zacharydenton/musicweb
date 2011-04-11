@@ -1,0 +1,28 @@
+---
+layout: musicalbum
+title: {{ album.title }}
+excerpt: |
+    Download {{ album.title }} for free in FLAC, OGG, MP3, and AAC.
+---
+
+<h2>Download</h2>
+<ul>
+    {% for format in album.formats %}
+    <li><a href="{{ format }}">{{ format|upper }}</a></li>
+    {% endfor %}
+</ul>
+
+<h2>Tracks</h2>
+<ul>
+    {% for song in album.songs %}
+    <li>{{ song.artist }} - {{ song.title }}</li>
+    {% endfor %}
+</ul>
+
+<h2>Artists</h2>
+<ul>
+    {% for artist in album.artists %}
+    <li>{{ artist }}</li>
+    {% endfor %}
+</ul>
+
