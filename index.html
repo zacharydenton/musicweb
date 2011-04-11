@@ -1,0 +1,17 @@
+---
+layout: page
+title: Music
+excerpt: |
+    This page contains {{ albums|length }} free albums for download in FLAC, OGG, MP3, and AAC.
+---
+{% for album in albums %}
+<article class="album">
+<h1>
+    <a href="{{ album.dirname }}/" rel="bookmark" title="{{ album }}">
+        {{ album }}
+	</a>
+</h1>
+</article>
+<hr />
+{% endfor %}
+
