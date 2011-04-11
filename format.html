@@ -1,0 +1,9 @@
+---
+layout: page
+title: {{ title }}
+excerpt: |
+    Download {{ title }} for free in {{ songs.0.encoding_name }}.
+---
+<ul>{% for song in songs %}
+    <li><a href="{{ song.filename }}">{{ song.track }} - {{ song.title }}</a></li>{% endfor  %}
+</ul>

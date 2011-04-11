@@ -11,6 +11,7 @@ import transcode
 
 encodings = ['FLAC', '320', 'V0', 'V2', 'Q8', 'AAC']
 album_template = Template(open('album.html').read())
+format_template = Template(open('format.html').read())
 index_template = Template(open('index.html').read())
 
 _slugify_strip_re = re.compile(r'[^\w\s-]')
@@ -100,10 +101,28 @@ class Album:
         ).encode('utf-8')
         open(output, 'w').write(content)
 
+    def generate_format_pages(self):
+        for format in self.formats:
+            output = os.path.join(self.path, format, "index.html")
+            content = format_template.render(
+                title=self.title,
+                format=format,
+                songs=sorted([song for song in self.files if slugify(song.encoding)==format], key = lambda s: s.track)
+            ).encode('utf-8')
+            open(output, 'w').write(content)
+
 class Song(mediafile.MediaFile):
     def __init__(self, path, encoding):
         super(Song, self).__init__(path)
         self.encoding = encoding
+        self.filename = os.path.basename(path)
+
+    @property
+    def encoding_name(self):
+        if self.format == self.encoding:
+            return self.format
+        else:
+            return self.format + ' ' + self.encoding
         
 def is_album(path):
     extensions = set(os.path.splitext(filename)[-1] for filename in os.listdir(path))
@@ -112,6 +131,7 @@ def is_album(path):
 def generate_albums(albums):
     for album in albums:
         album.generate_index()
+        album.generate_format_pages()
 
 def generate_index(albums, output):
     albums = sorted(albums, key = lambda a: a.title)
