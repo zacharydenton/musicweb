@@ -4,15 +4,20 @@ import os
 import glob
 import shutil
 import fnmatch
+import argparse
 import subprocess
+from PIL import Image
 from jinja2 import Template
+from collections import defaultdict
 import mediafile
 import transcode
 
+load_path = lambda x: os.path.join(os.path.dirname(__file__), x)
+
 encodings = ['FLAC', '320', 'V0', 'V2', 'Q8', 'AAC']
-album_template = Template(open('album.html').read())
-format_template = Template(open('format.html').read())
-index_template = Template(open('index.html').read())
+album_template = Template(open(load_path('album.html')).read())
+format_template = Template(open(load_path('format.html')).read())
+index_template = Template(open(load_path('index.html')).read())
 
 _slugify_strip_re = re.compile(r'[^\w\s-]')
 _slugify_hyphenate_re = re.compile(r'[-\s]+')
@@ -35,6 +40,8 @@ class Album:
         self.original_path = path
         self.dirname = slugify(os.path.split(self.original_path)[-1])
         self.path = os.path.join(albums_dir, self.dirname)
+        if not os.path.isdir(self.path):
+            os.makedirs(self.path)
 
         self.songs = []
         for song_filename in glob.glob(os.path.join(self.original_path, "*.flac")):
@@ -54,7 +61,7 @@ class Album:
         self.genres = sorted(set(song.genre for song in self.songs))
         self.date = self.songs[0].date
 
-        self.images = map(os.path.basename, glob.glob(os.path.join(self.path, "*.jpg")))
+        self.images = map(os.path.basename, sorted(glob.glob(os.path.join(self.path, "*.jpg")), key=lambda i: Image.open(i).size[0]))
         self.logs = map(os.path.basename, glob.glob(os.path.join(self.path, "*.log")))
         self.cuesheets = map(os.path.basename, glob.glob(os.path.join(self.path, "*.cue")))
         self.playlists = map(os.path.basename, glob.glob(os.path.join(self.path, "*.m3u")))
@@ -62,11 +69,13 @@ class Album:
         self.create_formats()
 
     def __str__(self):
-        return self.title
+        try:
+            return self.title
+        except:
+            return ''
 
     def create_formats(self):
-        self.files = []
-        self.formats = []
+        self.formats = defaultdict(list)
         self.zips = []
         for encoding in encodings:
             transcode_dir = os.path.join(self.path, slugify(encoding))
@@ -88,10 +97,9 @@ class Album:
 
             for filename in glob.glob(os.path.join(transcode_dir, "*")):
                 try:
-                    self.files.append(Song(filename, encoding=encoding))
+                    self.formats[slugify(encoding)].append(Song(filename, encoding=encoding))
                 except:
                     pass
-            self.formats.append(slugify(encoding))
             self.zips.append((os.path.basename(zip_file), encoding))
 
     def generate_index(self):
@@ -102,12 +110,12 @@ class Album:
         open(output, 'w').write(content)
 
     def generate_format_pages(self):
-        for format in self.formats:
+        for format in self.formats.keys():
             output = os.path.join(self.path, format, "index.html")
             content = format_template.render(
                 title=self.title,
                 format=format,
-                songs=sorted([song for song in self.files if slugify(song.encoding)==format], key = lambda s: s.track)
+                songs=sorted(self.formats[format], key = lambda s: s.track)
             ).encode('utf-8')
             open(output, 'w').write(content)
 
@@ -141,8 +149,12 @@ def generate_index(albums, output):
     open(output, 'w').write(content)
 
 def main():
-    music_dir = os.path.expanduser("~/Music")
-    output_dir = os.path.expanduser("~/www/music")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input', help="directory containing music")
+    parser.add_argument('output', help="directory to build musicweb")
+    args = parser.parse_args()
+    music_dir = os.path.expanduser(args.input)
+    output_dir = os.path.expanduser(args.output)
     index = os.path.join(output_dir, "index.html")
 
     albums = []

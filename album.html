@@ -2,52 +2,51 @@
 layout: page
 title: {{ album.title }}
 excerpt: |
-    Download {{ album.title }} for free in FLAC, OGG, MP3, and AAC.
+Download {{ album.title }} for free in FLAC, OGG, MP3, and AAC.
 ---
+<div class="grid_2 column side">
+    <div class="section">
+        <img src="{{ album.images.0 }}" alt="{{ album.title }}" />
+        <h3>Artists</h3>
+        <ul>
+            {% for artist in album.artists %}
+            <li>{{ artist }}</li>{% endfor %}
+        </ul>
+    </div>
+</div>
 
-{% for image in album.images %}
-<img src="{{ image }}" alt="{{ album.title }}" />
-{% endfor %}
-
-<h2>Download</h2>
-<h3>Entire album, zipped</h3>
-<ul>
-    {% for zip, format in album.zips %}
-    <li><a href="{{ zip }}">{{ format|upper }}</a></li>{% endfor %}
-</ul>
-
-<h3>Individual tracks</h3>
-<ul>
-    {% for format in album.formats %}
-    <li><a href="{{ format }}">{{ format|upper }}</a></li>{% endfor %}
-</ul>
-
-<hr />
-
-<h2>Album info</h2>
-<h3>Tracks</h3>
-<ul>{% for song in album.songs %}
-    <li>
+<div class="grid_8 column">
+    {% set counter = 0 %}
+    <ol>{% for song in album.songs %}
+        <li>
         <dl>
-            <dt>Track</dt>
-            <dd>{{ song.track }}</dd>
             <dt>Title</dt>
             <dd>{{ song.title }}</dd>
             <dt>Artist</dt>
             <dd>{{ song.artist }}</dd>
-            <dt>Length</dt>
-            <dd>{{ "%i:%02i"|format((song.length / 60)|int, (song.length % 60)|int) }}</dd>
-            {% if song.genre %}
-            <dt>Genre</dt>
-            <dd>{{ song.genre }}</dd>
-            {% endif %}
         </dl>
-    </li>{% endfor  %}
-</ul>
+        <audio controls="controls">
+        <source src="q8/{{ album.formats.q8[counter].filename }}" type="audio/ogg" />
+        <source src="v0/{{ album.formats.v0[counter].filename }}" type="audio/mpeg" />
+        </audio>
+        {% set counter = counter + 1 %}
+        </li>{% endfor  %}
+    </ol>
+</div>
 
-<h3>Artists</h3>
-<ul>
-    {% for artist in album.artists %}
-    <li>{{ artist }}</li>{% endfor %}
-</ul>
+<div class="grid_2 column">
+    <div class="section">
+        <h2>Download</h2>
+        <h3>Entire album, zipped</h3>
+        <ul>
+            {% for zip, format in album.zips %}
+            <li><a href="{{ zip }}">{{ format|upper }}</a></li>{% endfor %}
+        </ul>
 
+        <h3>Individual tracks</h3>
+        <ul>
+            {% for format in album.formats %}
+            <li><a href="{{ format }}">{{ format|upper }}</a></li>{% endfor %}
+        </ul>
+    </div>
+</div>
