@@ -4,12 +4,6 @@ title: Music
 excerpt: |
     This page contains {{ albums|length }} free albums for download in FLAC, OGG, MP3, and AAC.
 ---
-<div class="grid_2 column side">
-	<div class="section">
-        x
-    </div>
-</div>
-
 <div class="grid_8 column postlist">
 {% for album in albums %}
 <article class="album">
@@ -18,7 +12,7 @@ excerpt: |
         {{ album }}
 	</a>
 </h1>
-	<time datetime="{{ album.date | date: "%Y-%m-%d" }}">{{ album.date | date: "%B %d, %Y" }}</time>
+	<time datetime="{{ album.date }}">{{ album.formatted_date }}</time>
 	{% if album.commentary %}
 	{{ album.commentary }}
 	{% endif %}
@@ -26,8 +20,7 @@ excerpt: |
 {% endfor %}
 </div>
 
-<div class="grid_2 column">
-	<div class="section">
-        x
-    </div>
+<div class="grid_4 column">
+    <h2 class="dashed-subtitle">Latest music</h2>
+    <div id="latest-music"></div>
 </div>

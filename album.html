@@ -2,11 +2,11 @@
 layout: page
 title: {{ album.title }}
 excerpt: |
-Download {{ album.title }} for free in FLAC, OGG, MP3, and AAC.
+    Download {{ album.title }} for free in FLAC, OGG, MP3, and AAC.
 ---
 <div class="grid_2 column side">
     <div class="section">
-        <img src="{{ album.images.0 }}" alt="{{ album.title }}" />
+        <img class="album-cover" rel="lightbox" src="{{ album.images.0 }}" alt="{{ album.title }}" />
         <h3>Artists</h3>
         <ul>
             {% for artist in album.artists %}
@@ -35,18 +35,16 @@ Download {{ album.title }} for free in FLAC, OGG, MP3, and AAC.
 </div>
 
 <div class="grid_2 column">
-    <div class="section">
-        <h2>Download</h2>
-        <h3>Entire album, zipped</h3>
-        <ul>
-            {% for zip, format in album.zips %}
-            <li><a href="{{ zip }}">{{ format|upper }}</a></li>{% endfor %}
-        </ul>
+    <h2 class="dashed-subtitle">Download</h2>
+    <h3>Entire album, zipped</h3>
+    <ul>
+        {% for zip, format in album.zips %}
+        <li><a href="{{ zip }}">{{ format|upper }}</a></li>{% endfor %}
+    </ul>
 
-        <h3>Individual tracks</h3>
-        <ul>
-            {% for format in album.formats %}
-            <li><a href="{{ format }}">{{ format|upper }}</a></li>{% endfor %}
-        </ul>
-    </div>
+    <h3>Individual tracks</h3>
+    <ul>
+        {% for format in album.formats %}
+        <li><a href="{{ format }}">{{ format|upper }}</a></li>{% endfor %}
+    </ul>
 </div>

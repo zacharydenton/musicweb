@@ -68,6 +68,10 @@ class Album:
 
         self.create_formats()
 
+    @property
+    def formatted_date(self):
+        return self.date.strftime('%B %d, %Y')
+
     def __str__(self):
         try:
             return self.title
