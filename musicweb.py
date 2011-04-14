@@ -156,6 +156,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('input', help="directory containing music")
     parser.add_argument('output', help="directory to build musicweb")
+    parser.add_argument('--nopages', action='store_true', help="don't build html pages")
     args = parser.parse_args()
     music_dir = os.path.expanduser(args.input)
     output_dir = os.path.expanduser(args.output)
@@ -167,8 +168,9 @@ def main():
         if is_album(path):
             albums.append(Album(path, output_dir))
     
-    generate_albums(albums)
-    generate_index(albums, index)
+    if not args.nopages:
+        generate_albums(albums)
+        generate_index(albums, index)
 
 if __name__ == "__main__":
     main()
