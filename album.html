@@ -35,16 +35,18 @@ excerpt: |
 </div>
 
 <div class="grid_2 column">
-    <h2 class="dashed-subtitle">Download</h2>
-    <h3>Entire album, zipped</h3>
-    <ul>
-        {% for zip, format in album.zips %}
-        <li><a href="{{ zip }}">{{ format|upper }}</a></li>{% endfor %}
-    </ul>
+    <div class="section">
+        <h2>Download</h2>
+        <h3>Zipped</h3>
+        <ul>
+            {% for zip, format in album.zips %}
+            <li><a href="{{ zip }}">{{ format|upper }}</a></li>{% endfor %}
+        </ul>
 
-    <h3>Individual tracks</h3>
-    <ul>
-        {% for format in album.formats %}
-        <li><a href="{{ format }}">{{ format|upper }}</a></li>{% endfor %}
-    </ul>
+        <h3>Tracks</h3>
+        <ul>
+            {% for format in album.formats %}
+            <li><a href="{{ format }}">{{ format|upper }}</a></li>{% endfor %}
+        </ul>
+    </div>
 </div>

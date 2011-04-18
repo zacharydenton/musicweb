@@ -1,26 +1,29 @@
 ---
-layout: page
+layout: default
 title: Music
 excerpt: |
     This page contains {{ albums|length }} free albums for download in FLAC, OGG, MP3, and AAC.
 ---
-<div class="grid_8 column postlist">
-{% for album in albums %}
-<article class="album">
-<h1>
-    <a href="{{ album.dirname }}/" rel="bookmark" title="{{ album }}">
-        {{ album }}
-	</a>
-</h1>
-	<time datetime="{{ album.date }}">{{ album.formatted_date }}</time>
-	{% if album.commentary %}
-	{{ album.commentary }}
-	{% endif %}
-</article>
-{% endfor %}
+<div class="grid_7 column">
+    <h1>The Music</h1>
+    <div class="postlist">
+        {% for album in albums %}
+        <article class="album">
+        <h1>
+            <a href="{{ album.dirname }}/" rel="bookmark" title="{{ album }}">
+                {{ album }}
+            </a>
+        </h1>
+        <time datetime="{{ album.date }}">{{ album.formatted_date }}</time>
+        {% if album.commentary %}
+        {{ album.commentary }}
+        {% endif %}
+        </article>
+        {% endfor %}
+    </div>
 </div>
-
+<div class="grid_1 column">&nbsp;</div>
 <div class="grid_4 column">
-    <h2 class="dashed-subtitle">Latest music</h2>
+    <h2 class="spaced dashed-subtitle">Recently played</h2>
     <div id="latest-music"></div>
 </div>
